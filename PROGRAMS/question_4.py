@@ -1,38 +1,40 @@
-import pdb
-
-# from utils import pcd_to_pcd_reg
-from test import icp as pcd_to_pcd_reg
-
+import numpy as np
 from data_processing import parse_calbody, parse_calreadings
+from transform import FT
+from utils import pcd_to_pcd_reg_w_known_correspondence
 
 
-def main():
-    """The main function for Programming Assignment 1, question 4."""
-    # Question 4a : compute F_D for each frame
-    # read relevant data
-    calbody = parse_calbody("../DATA/pa1-unknown-k-calbody.txt")
-    calreadings_frames = parse_calreadings("../DATA/pa1-unknown-k-calreadings.txt")
-    # for each frame, compute F_D between the optical tracker and EM tracker coords
-    F_D_frames = list()
-    for frame in calreadings_frames:
+def compute_C_i_expected(calbody_file_path: str, calreadings_file_path: str):
+    """Takes in the calibration dataset prefix (e.g. "pa1-debug-c-").
+    Loads the relevant data, and follows the procedures outlined
+    in Question 4 under Assignment 1 in CIS I PA 1 to compute the C_i_expected
+    for each frame in the calibration dataset.
+
+    Params:
+        calibration_dataset_prefix (str): the prefix of the calibration
+            dataset
+
+    Returns:
+        np.ndarray: the computed C_i_expected for each frame in the
+            calibration dataset.
+    """
+    calbody = parse_calbody(calbody_file_path)
+    calreadings = parse_calreadings(calreadings_file_path)
+    # for each frame, compute C_i_expected
+    C_i_expected_frames = list()
+    for frame in calreadings:
         d_vals = calbody["d"]
-        D_vals = frame["D"]
-        assert d_vals.shape == D_vals.shape
-        F_D = pcd_to_pcd_reg(D_vals, d_vals)
-        print(d_vals - F_D.transform_pts(D_vals))
-        print(D_vals - F_D.transform_pts(d_vals))
-        print(D_vals - F_D.inverse_transform_pts(d_vals))
-        F_D_frames.append(F_D)
-    # Question 4b : compute F_A for each frame
-    F_A_frames = list()
-    for frame in calreadings_frames:
         a_vals = calbody["a"]
+        c_vals = calbody["c"]
+        D_vals = frame["D"]
         A_vals = frame["A"]
-        assert a_vals.shape == A_vals.shape
-        F_A = pcd_to_pcd_reg(A_vals, a_vals)
-        F_A_frames.append(F_A)
-    # Question 4c : compute C_expected for each frame
+        F_Dd = pcd_to_pcd_reg_w_known_correspondence(d_vals, D_vals)
+        F_Aa = pcd_to_pcd_reg_w_known_correspondence(a_vals, A_vals)
+        # compute C_i_expected = F_Dd_inv * F_Aa * c_i
+        C_i_expected = F_Dd.inverse_transform_pts(F_Aa.transform_pts(c_vals))
+        C_i_expected_frames.append(C_i_expected)
+    return np.array(C_i_expected_frames)
 
 
-if __name__ == "__main__":
-    main()
+def question_4():
+    pass
