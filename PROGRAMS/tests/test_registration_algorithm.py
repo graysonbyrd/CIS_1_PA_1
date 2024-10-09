@@ -1,35 +1,12 @@
 import os
-import pdb
 
 import numpy as np
-from data_processing import parse_calbody, parse_calreadings
-from question_4 import compute_C_i_expected
+from main import compute_C_i_expected
 from scipy.spatial.transform import Rotation as R
-from transform import FT
-from utils import pcd_to_pcd_reg_w_known_correspondence
-
-dataset_prefixes = [
-    "pa1-debug-a-",
-    "pa1-debug-b-",
-    "pa1-debug-c-",
-    "pa1-debug-d-",
-    "pa1-debug-e-",
-    "pa1-debug-f-",
-    "pa1-debug-g-",
-    "pa1-unknown-h-",
-    "pa1-unknown-i-",
-    "pa1-unknown-j-",
-    "pa1-unknown-k-",
-]
-
-
-def compute_avg_mse_between_two_pcds(pcd_1: np.ndarray, pcd_2: np.ndarray):
-    """Computes the average mse between each pointcloud correspondence in
-    a pair of pointclouds. The pointclouds are expected to be sorted so
-    that the indexes in one correspond with the same index in the other."""
-    assert pcd_1.shape == pcd_2.shape, "Ensure that the two pcd sets are of same len"
-    num_points = pcd_1.shape[0]
-    return np.sqrt(np.sum((pcd_1 - pcd_2) ** 2)) / num_points
+from tests.test_utils import TEST_DIR, compute_avg_mse_between_two_pcds
+from utils.data_processing import dataset_prefixes, parse_calreadings
+from utils.pcd_2_pcd_reg import pcd_to_pcd_reg_w_known_correspondence
+from utils.transform import FT
 
 
 def test_pcd_to_pcd_with_known_correspondence_registration_w_noise():
@@ -107,8 +84,12 @@ def test_compute_C_i_expected():
             calibration dataset.
     """
     for idx, prefix in enumerate(dataset_prefixes):
-        calbody_path = os.path.join("..", "..", "DATA", f"{prefix}calbody.txt")
-        calreadings_path = os.path.join("..", "..", "DATA", f"{prefix}calreadings.txt")
+        calbody_path = os.path.join(
+            TEST_DIR, "..", "..", "DATA", f"{prefix}calbody.txt"
+        )
+        calreadings_path = os.path.join(
+            TEST_DIR, "..", "..", "DATA", f"{prefix}calreadings.txt"
+        )
         C_i_expected_frames = compute_C_i_expected(calbody_path, calreadings_path)
         calreadings = parse_calreadings(calreadings_path)
         for idx, C_i_expected in enumerate(C_i_expected_frames):
@@ -116,7 +97,3 @@ def test_compute_C_i_expected():
             avg_mse = compute_avg_mse_between_two_pcds(C_i_expected, C_i_true)
             # this number is somewhat arbitrary, but provides a sanity check
             assert avg_mse < 5
-
-
-# if __name__ == "__main__":
-#     test_pcd_to_pcd_with_known_correspondence_registration()

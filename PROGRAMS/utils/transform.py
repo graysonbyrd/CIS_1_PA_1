@@ -20,7 +20,7 @@ class FT:
             np.ndarray: Transformed points in the target coordinate frame
         """
         if pts.shape[1] != 3:
-            raise ValueError(f"Points must be of shape (n, 3), not (n, {pts.shape[0]})")
+            raise ValueError(f"Points must be of shape (n, 3), not (n, {pts.shape[1]})")
         return np.dot(self.R, pts.T).T + self.t
 
     def inverse_transform_pts(self, pts: np.ndarray):

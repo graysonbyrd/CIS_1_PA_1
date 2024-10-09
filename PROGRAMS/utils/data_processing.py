@@ -3,6 +3,20 @@ from typing import Dict, List
 
 import numpy as np
 
+dataset_prefixes = [
+    "pa1-debug-a-",
+    "pa1-debug-b-",
+    "pa1-debug-c-",
+    "pa1-debug-d-",
+    "pa1-debug-e-",
+    "pa1-debug-f-",
+    "pa1-debug-g-",
+    "pa1-unknown-h-",
+    "pa1-unknown-i-",
+    "pa1-unknown-j-",
+    "pa1-unknown-k-",
+]
+
 
 def parse_calbody(path: str) -> Dict:
     """Parses a calbody.txt file according to the specifications
@@ -86,10 +100,11 @@ def parse_empivot(path: str) -> List[Dict]:
     idx = 1
     frames = list()
     for _ in range(N_frames):
-        g = list()
+        G = list()
         for i in range(N_G):
-            g.append([float(x) for x in data[idx + i].split(" ") if x != ""])
-        frames.append({"g": np.array(g)})
+            G.append([float(x) for x in data[idx + i].split(" ") if x != ""])
+        frames.append({"G": np.array(G)})
+        idx += N_G
     return frames
 
 
@@ -106,14 +121,15 @@ def parse_optpivot(path: str) -> List[Dict]:
     idx = 1
     frames = list()
     for _ in range(N_frames):
-        d = list()
-        h = list()
+        D = list()
+        H = list()
         for i in range(N_D):
-            d.append([float(x) for x in data[idx + i].split(" ") if x != ""])
+            D.append([float(x) for x in data[idx + i].split(" ") if x != ""])
         idx += N_D
         for i in range(N_H):
-            h.append([float(x) for x in data[idx + i].split(" ") if x != ""])
-        frames.append({"d": np.array(d), "h": np.array(h)})
+            H.append([float(x) for x in data[idx + i].split(" ") if x != ""])
+        frames.append({"D": np.array(D), "H": np.array(H)})
+        idx += N_H
     return frames
 
 
