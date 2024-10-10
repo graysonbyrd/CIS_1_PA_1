@@ -5,7 +5,7 @@ Navigate to the PROGRAMS/ directory and run the following to create the required
 
 ```bash
 conda create -n gbbyrd_cis_pa_1 python=3.11
-conda activate gbbyre_cis_pa_1
+conda activate gbbyrd_cis_pa_1
 pip install -r requirements.txt
 ```
 
